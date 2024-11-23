@@ -40,3 +40,4 @@ Aspose.PDF
 pdf2docx
 tika
 python-multipart
+requests

@@ -1,3 +1,4 @@
+import requests
 import streamlit as st
 import streamlit_pdf_viewer as stpdf
 
@@ -26,11 +27,26 @@ with left_col:
     document = st.file_uploader("Document", key="document", type=["txt", "pdf"])
     template = st.file_uploader("Template", key="template", type=["txt", "pdf"])
 
+    files = []
+    if document is not None:
+        file_type = document.type
+        if file_type == "application/pdf":
+            files.append(("files", (document.name, document.getvalue(), document.type)))
+
+    if template is not None:
+        file_type = template.type
+        if file_type == "application/pdf":
+            files.append(("files", (template.name, template.getvalue(), template.type)))
+
     if st.button("Submit"):
-        st.session_state.results = [
-            {"level": "error", "message": "Incorrect phone number"},
-            {"level": "warning", "message": "Better wording. Try ...."},
-        ]
+        if document and template:
+            st.session_state.results = [
+                {"level": "error", "message": "Incorrect phone number"},
+                {"level": "warning", "message": "Better wording. Try ...."},
+            ]
+            files = []
+            response = requests.post("http://localhost:8000/chat", files=files)
+            print(response.text)
 
     # st.header("Chat")
 
@@ -48,6 +64,9 @@ with right_col:
         stpdf.pdf_viewer("resources/test_pdf.pdf", width=500)
     with chat_tab:
         st.header("Chat")
+        prompt = st.chat_input("Ask something about document")
+        if prompt:
+            st.write(f"Prompt: {prompt}")
 
 
 # if document is not None:
