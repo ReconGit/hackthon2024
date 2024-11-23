@@ -6,7 +6,11 @@ from pydantic import BaseModel
 
 
 class FormStructure(BaseModel):
-    name: str
+    sender_name: str
+    sender_physical_address: str
+    addressee_name: str
+    addressee_physical_address: str
+    current_date: str
     # TODO: Add more fields
 
 
