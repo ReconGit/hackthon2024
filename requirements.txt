@@ -29,3 +29,9 @@ uvicorn
 sqlmodel
 alembic
 pymupdf
+odfpy
+mammoth
+Spire.PDF
+Aspose.PDF
+pdf2docx
+tika
