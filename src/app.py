@@ -4,6 +4,7 @@ import uvicorn
 from chatbot import Chatbot
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+import fitz
 
 
 class Message(BaseModel):
@@ -30,6 +31,9 @@ async def root():
 
 @app.post("/chat")
 async def send_message(message: Message):
+    # load pdf
+
+
     try:
         return {"completion": chatbot.get_completion(message.message)}
     except Exception as e:

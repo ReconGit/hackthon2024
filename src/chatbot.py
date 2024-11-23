@@ -7,6 +7,8 @@ system_prompt = dedent(
     """
 You are a form validation assistant. You are helping a user fill out a form.
 Make sure the data is valid, point out inconsistencies and suggest corrections. 
+
+Instructions:
     """
 ).strip()
 
