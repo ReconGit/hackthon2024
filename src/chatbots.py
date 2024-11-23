@@ -32,7 +32,7 @@ class Chatbot:
         )
         return completion.choices[0].message.content
 
-    def get_structure(self, message):
+    def get_structured_output(self, message):
         system_prompt = dedent(
             """
             Extract the structure from the given text.

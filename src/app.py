@@ -51,7 +51,7 @@ async def chat(message: Message):
 @app.post("/structure")
 async def structure(message: Message):
     try:
-        structure = chatbot.get_structure(message.message)
+        structure = chatbot.get_structured_output(message.message)
         return {"structure": structure}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {e}")
