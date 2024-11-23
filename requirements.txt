@@ -33,7 +33,6 @@ streamlit
 streamlit-pdf-viewer
 pymupdf
 pymupdf
-odfpy
 mammoth
 Spire.PDF
 Aspose.PDF
