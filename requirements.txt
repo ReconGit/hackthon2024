@@ -30,3 +30,4 @@ sqlmodel
 alembic
 # ui
 streamlit
+streamlit-pdf-viewer
