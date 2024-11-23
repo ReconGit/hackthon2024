@@ -1,16 +1,16 @@
 from contextlib import asynccontextmanager
-from typing import Optional
+from typing import List
 
 import fitz
 import uvicorn
-from chatbot import Chatbot
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from pydantic import BaseModel
+
+from chatbot import Chatbot
 
 
 class Message(BaseModel):
     session_id: int
-    message: str
 
 
 chatbot = Chatbot()
@@ -33,7 +33,7 @@ async def root():
 
 
 @app.post("/chat")
-async def chat(message: Message, files: Optional[list[UploadFile]] = None):
+async def chat(message: Message, files: List[UploadFile] = File(...)):
     try:
         if message.session_id not in session_history:
             session_history[message.session_id] = []

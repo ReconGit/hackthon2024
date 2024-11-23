@@ -40,4 +40,3 @@ pdf2docx
 tika
 python-multipart
 requests
-fitz

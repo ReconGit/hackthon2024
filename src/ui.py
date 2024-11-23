@@ -49,7 +49,7 @@ with left_col:
                 {"level": "error", "message": "Incorrect phone number"},
                 {"level": "warning", "message": "Better wording. Try ...."},
             ]
-            data = {"session_id": 1, "message": "some test message"}
+            data = {"session_id": 1}
             response = requests.post("http://localhost:8000/chat", data=data, files=files)
             print(response.text)
 
