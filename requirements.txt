@@ -29,7 +29,6 @@ uvicorn
 sqlmodel
 alembic
 pymupdf
-odfpy
 mammoth
 Spire.PDF
 Aspose.PDF
