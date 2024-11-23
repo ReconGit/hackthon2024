@@ -28,7 +28,17 @@ fastapi
 uvicorn
 sqlmodel
 alembic
+<<<<<<< HEAD
 # ui
 streamlit
 streamlit-pdf-viewer
 pymupdf
+=======
+pymupdf
+odfpy
+mammoth
+Spire.PDF
+Aspose.PDF
+pdf2docx
+tika
+>>>>>>> main
