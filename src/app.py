@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 import fitz
 import uvicorn
 from chatbots import Chatbot
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, HTTPException, UploadFile
 from pydantic import BaseModel
 
 
@@ -53,6 +53,20 @@ async def structure(message: Message):
     try:
         structure = chatbot.get_structured_output(message.message)
         return {"structure": structure}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {e}")
+
+
+@app.post("/upload-pdf")
+async def upload_pdf(file: UploadFile = File(...)):
+    try:
+        content = await file.read()
+        pdf_document = fitz.open(stream=content, filetype="pdf")
+        extracted_text = ""
+        for page in pdf_document:
+            extracted_text += page.get_text()
+
+        return {"text": extracted_text}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {e}")
 
