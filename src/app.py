@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 
 import fitz
 import uvicorn
-from chatbots import Chatbot
+from chatbot import Chatbot
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from pydantic import BaseModel
 
