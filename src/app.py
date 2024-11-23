@@ -1,17 +1,19 @@
 from contextlib import asynccontextmanager
 
+import fitz
 import uvicorn
-from chatbot import Chatbot
+from chatbots import Chatbot
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import fitz
 
 
 class Message(BaseModel):
+    session_id: int
     message: str
 
 
 chatbot = Chatbot()
+session_history = {}
 
 
 @asynccontextmanager
@@ -30,12 +32,27 @@ async def root():
 
 
 @app.post("/chat")
-async def send_message(message: Message):
-    # load pdf
-
-
+async def chat(message: Message):
     try:
-        return {"completion": chatbot.get_completion(message.message)}
+        if message.session_id not in session_history:
+            session_history[message.session_id] = []
+
+        message_history: list[dict] = session_history[message.session_id]
+        message_history.append({"role": "user", "content": message.message})
+
+        completion = chatbot.get_chat_completion(message_history)
+        message_history.append({"role": "assistant", "content": completion})
+
+        return {"completion": completion}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {e}")
+
+
+@app.post("/structure")
+async def structure(message: Message):
+    try:
+        structure = chatbot.get_structure(message.message)
+        return {"structure": structure}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {e}")
 

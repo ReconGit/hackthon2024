@@ -1,4 +1,5 @@
 import fitz
+fitz.Page
 
 pdf_path = "../data/2.pdf"
 
