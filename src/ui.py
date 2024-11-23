@@ -1,3 +1,5 @@
+import base64
+
 import requests
 import streamlit as st
 import streamlit_pdf_viewer as stpdf
@@ -16,7 +18,12 @@ def display_result(con, result):
         c = con.container(border=True)
         icon_col, error_col = c.columns([0.05, 0.8], vertical_alignment="center")
         with icon_col:
-            st.image("resources/error.png")
+            match entry["level"]:
+                case "error":
+                    st.image("resources/error.png")
+                case "warning":
+                    st.image("resources/warning.png")
+
         with error_col:
             st.write(entry["message"])
 
@@ -32,16 +39,17 @@ with left_col:
     document = st.file_uploader("Document", key="document", type=["pdf"])
     template = st.file_uploader("Template", key="template", type=["pdf"])
 
-    files = []
+    data = {"session_id": 1, "message": "hello"}
+
     if document is not None:
         file_type = document.type
         if file_type == "application/pdf":
-            files.append(("files", (document.name, document.getvalue(), document.type)))
+            data["document"] = base64.encodebytes(document.getvalue())
 
     if template is not None:
         file_type = template.type
         if file_type == "application/pdf":
-            files.append(("files", (template.name, template.getvalue(), template.type)))
+            data["template"] = base64.encodebytes(template.getvalue())
 
     if st.button("Submit"):
         if document and template:
@@ -49,8 +57,7 @@ with left_col:
                 {"level": "error", "message": "Incorrect phone number"},
                 {"level": "warning", "message": "Better wording. Try ...."},
             ]
-            data = {"session_id": 1}
-            response = requests.post("http://localhost:8000/chat", data=data, files=files)
+            response = requests.post("http://localhost:8000/chat", data=data)
             print(response.text)
 
 with right_col:
