@@ -55,9 +55,9 @@ def pdfToRawText(fileName: str):
     raw = parser.from_file(fileName)
     print(raw['content'])
 
-
-# docxToHtml("../documents/grants/Grant Proposal for Solar Panel Installation.docx")
-#pdfToHTML("../documents/build_permit/Invalid_example_multiple_check.pdf")
-pdfToHtml_v2("../documents/employment_contract/Employment Contract sample.pdf")
-#pdfToHtml_v3("../documents/employment_contract/Employment Contract sample.pdf")
-#pdfToRawText("../documents/employment_contract/Employment Contract sample.pdf")
+# For texting
+# # docxToHtml("../documents/grants/Grant Proposal for Solar Panel Installation.docx")
+# #pdfToHTML("../documents/build_permit/Invalid_example_multiple_check.pdf")
+# pdfToHtml_v2("../data/1.pdf")
+# #pdfToHtml_v3("../documents/employment_contract/Employment Contract sample.pdf")
+# #pdfToRawText("../documents/employment_contract/Employment Contract sample.pdf")
