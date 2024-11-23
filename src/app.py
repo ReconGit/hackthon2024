@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from typing import Optional
 
 import fitz
 import uvicorn
@@ -32,13 +33,26 @@ async def root():
 
 
 @app.post("/chat")
-async def chat(message: Message):
+async def chat(message: Message, files: Optional[list[UploadFile]] = None):
     try:
         if message.session_id not in session_history:
             session_history[message.session_id] = []
-
         message_history: list[dict] = session_history[message.session_id]
-        message_history.append({"role": "user", "content": message.message})
+
+        if files:
+            file_contents = []
+            for file in files:
+                content = await file.read()
+                pdf_document = fitz.open(stream=content, filetype="pdf")
+                extracted_text = ""
+                for page in pdf_document:
+                    extracted_text += page.get_text()
+                file_contents.append(extracted_text)
+
+            files_message = message.message + "\nUploaded documents:\n".join(file_contents)
+            message_history.append({"role": "user", "content": files_message})
+        else:
+            message_history.append({"role": "user", "content": message.message})
 
         completion = chatbot.get_chat_completion(message_history)
         message_history.append({"role": "assistant", "content": completion})
@@ -57,7 +71,7 @@ async def structure(message: Message):
         raise HTTPException(status_code=500, detail=f"Error: {e}")
 
 
-@app.post("/upload-pdf")
+@app.post("/upload-pdf")  # DEPRECATED
 async def upload_pdf(file: UploadFile = File(...)):
     try:
         content = await file.read()
