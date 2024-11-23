@@ -1,11 +1,11 @@
 # python version 3.11
---extra-index-url https://download.pytorch.org/whl/cu124
-ninja
-torch
-torchaudio
-torchvision
-sentence_transformers
-xformers
+# --extra-index-url https://download.pytorch.org/whl/cu124
+# ninja
+# torch
+# torchaudio
+# torchvision
+# sentence_transformers
+# xformers
 # data
 numpy
 scipy
@@ -28,3 +28,5 @@ fastapi
 uvicorn
 sqlmodel
 alembic
+# ui
+streamlit
