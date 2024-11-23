@@ -2,7 +2,12 @@ import requests
 import streamlit as st
 import streamlit_pdf_viewer as stpdf
 
-st.set_page_config(page_title="QuickForm", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(
+    page_title="QuickForm",
+    layout="wide",
+    page_icon="resources/icon.png",
+    initial_sidebar_state="expanded",
+)
 st.title("QuickForm")
 
 
@@ -23,9 +28,9 @@ left_col, _, right_col = st.columns([0.35, 0.05, 0.6])
 
 with left_col:
     results = st.session_state.results
-    st.header("Drop here your documents")
-    document = st.file_uploader("Document", key="document", type=["txt", "pdf"])
-    template = st.file_uploader("Template", key="template", type=["txt", "pdf"])
+    st.header("Upload your documents here")
+    document = st.file_uploader("Document", key="document", type=["pdf"])
+    template = st.file_uploader("Template", key="template", type=["pdf"])
 
     files = []
     if document is not None:
@@ -44,11 +49,9 @@ with left_col:
                 {"level": "error", "message": "Incorrect phone number"},
                 {"level": "warning", "message": "Better wording. Try ...."},
             ]
-            files = []
-            response = requests.post("http://localhost:8000/chat", files=files)
+            data = {"session_id": 1, "message": "some test message"}
+            response = requests.post("http://localhost:8000/chat", data=data, files=files)
             print(response.text)
-
-    # st.header("Chat")
 
 with right_col:
     results_tab, preview_tab, chat_tab = st.tabs(["Results", "Preview", "Chat"])
@@ -67,18 +70,3 @@ with right_col:
         prompt = st.chat_input("Ask something about document")
         if prompt:
             st.write(f"Prompt: {prompt}")
-
-
-# if document is not None:
-#     file_type = document.type
-#     if file_type == "text/plain":
-#         document_content = document.getvalue()
-#     elif file_type == "application/pdf":
-#         document_content = document.getvalue()
-
-# if template is not None:
-#     file_type = template.type
-#     if file_type == "text/plain":
-#         template_content = template.getvalue()
-#     elif file_type == "application/pdf":
-#         template_content = template.getvalue()
