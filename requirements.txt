@@ -28,3 +28,9 @@ fastapi
 uvicorn
 sqlmodel
 alembic
+odfpy
+mammoth
+Spire.PDF
+Aspose.PDF
+pdf2docx
+tika
