@@ -31,6 +31,7 @@ class Improvement(BaseModel):
 
 class Analysis(BaseModel):
     issues: list[Improvement]
+    rating: int
 
 
 class Chatbot:
@@ -78,14 +79,14 @@ class Chatbot:
             """
             Based on the instructions that were provided in template file evaluate my request in filled document. Make sure to structure your evaluation in a way that conforms to this JSON design:
             
-            {
+            [
                 {
                     "type": level,
                     "message": message,
                     "occurrence": occurrence,
                     "suggestion": suggestion,
                 }
-            }
+            ]
             
             
             Types can fall under these categories (each determining what the message, occurrence and suggestion will contain):
@@ -101,6 +102,9 @@ class Chatbot:
                 - message: what is improvable and the reason why it is improvable (should be at most 80 characters long)
                 - occurrence: the exact citation of the occurrence in text
                 - suggestion: an example/suggestion with what the instance could be replaced with
+            
+            rating: percentual rating of the quality of the data provided by user in the filled document 
+            in respect to the template document
             """
         ).strip()
         messages = [{"role": "system", "content": system_prompt}]
