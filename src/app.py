@@ -82,7 +82,7 @@ async def structure(
 
 
 @app.post("/improvements")
-async def structure(
+async def improvements(
     session_id: str = Form(...),
     message: str = Form(...),
     files: Optional[list[UploadFile]] = None,

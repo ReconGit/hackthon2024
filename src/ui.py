@@ -109,7 +109,8 @@ with left_col:
                 "session_id": session_id,
                 "message": "Hello, I need help with this document",
             }
-            r = requests.post("http://localhost:8000/structure", data=data, files=files)
+            r = requests.post("http://localhost:8000/improvements", data=data, files=files)
+            print(r.json())
 
 with right_col:
     st.header("Result")
