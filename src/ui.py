@@ -46,8 +46,11 @@ def display_result(con, result):
         with icon_col:
             show_icon(entry["type"])
         with error_col:
-            with st.expander(entry["message"]):
-                st.write(entry["suggestion"])
+            if entry["type"] == "missing":
+                st.write(entry["message"])
+            else:
+                with st.expander(entry["message"]):
+                    st.write(entry["suggestion"])
 
 
 def hightlight_color(defect):
