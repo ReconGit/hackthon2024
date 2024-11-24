@@ -4,8 +4,9 @@ from typing import Optional
 
 import pymupdf as fitz
 import uvicorn
-from chatbot import Chatbot
 from fastapi import FastAPI, Form, HTTPException, UploadFile
+
+from chatbot import Chatbot
 
 chatbot = Chatbot()
 session_history = {}
@@ -116,7 +117,9 @@ async def analysis(
                 extracted_text = ""
                 for page in pdf_document:
                     extracted_text += page.get_text()
-                file_contents.append(f'Extracted text from file "{file_name}":\n{extracted_text}\n\n')
+                file_contents.append(
+                    f'Extracted text from file "{file_name}":\n{extracted_text}\n\n'
+                )
 
             prompt_message = dedent(
                 f"""
