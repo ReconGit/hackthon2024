@@ -43,7 +43,8 @@ class Chatbot:
         system_prompt = dedent(
             """
             You are a Form Validation Assistant. You are helping a user fill out a form.
-            Make sure the data is valid, point out inconsistencies and suggest corrections.
+            Make sure the data is valid, point out inconsistencies and suggest corrections based on the context.
+            Importantly, keep your responses concise and to the point, only answer the user's question.
             """
         ).strip()
         messages = [{"role": "system", "content": system_prompt}]
@@ -78,7 +79,6 @@ class Chatbot:
         system_prompt = dedent(
             """
             Based on the instructions that were provided in template file evaluate my request in filled document. Make sure to structure your evaluation in a way that conforms to this JSON design:
-            
             [
                 {
                     "type": level,
@@ -123,19 +123,19 @@ class Chatbot:
     def get_summary(self, message_history):
         system_prompt = dedent(
             """
-            Summarize what this filled document is about in no more than 300 characters (around 3 sentences) 
-            as if it was a description of the file in a document viewing application
+            Summarize what this filled document is about in no more than 300 characters (around 3 sentences).
+            As if it was a description of the file in a document viewing application.
             """
         ).strip()
         messages = [{"role": "system", "content": system_prompt}]
         messages.extend(message_history)
 
-        structure = self.openai_client.beta.chat.completions.parse(
+        summary = self.openai_client.chat.completions.create(
             messages=messages,  # type: ignore
             model="gpt-4o-mini",
-            temperature=0.0,
+            temperature=0.0,  # for reproducibility
         )
-        return structure.choices[0].message.parsed
+        return summary.choices[0].message.content
 
 
 if __name__ == "__main__":
