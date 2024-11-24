@@ -190,10 +190,10 @@ with right_col:
             defects_tab.write("Nothing to see...")
     with summary_tab:
         show_summary()
-        # session_id_ = st.session_state.session_id
-        # data = {"session_id": session_id_, "message": "hello"}
-        # r = requests.post("http://localhost:8000/summary", data=data)
-        # print(r.text)
+        session_id_ = st.session_state.session_id
+        data = {"session_id": session_id_, "message": "hello"}
+        r = requests.post("http://localhost:8000/summary", data=data)
+        print(r.text)
     with preview_tab:
         highlight_defects()
     with chat_tab:
