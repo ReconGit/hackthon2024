@@ -60,7 +60,7 @@ def hightlight_color(defect):
 
 
 def highlight_defect(pdf, defect):
-    if defect["type"] == "missing":
+    if defect["type"] == "missing" or not defect["occurence"]:
         return
 
     for i in range(0, pdf.page_count):
@@ -129,7 +129,7 @@ with left_col:
                 "session_id": session_id_,
                 "message": "Hello, I need help with this document",
             }
-            response = requests.post("http://localhost:8000/analysis", data=data)
+            response = requests.post("http://localhost:8000/analysis", data=data, files=files)
             st.session_state.results = response.json()["analysis"]["issues"]
 
 with right_col:
