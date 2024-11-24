@@ -69,7 +69,6 @@ async def structure(
                 print(f"Extracted text from {extracted_text}")
 
             structure_message = message + "\nUploaded documents:\n".join(file_contents)
-            print(f"Structure message: {structure_message}")
         else:
             structure_message = message
         message_history.append({"role": "user", "content": structure_message})

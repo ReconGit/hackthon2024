@@ -59,7 +59,7 @@ with left_col:
             ]
             data = {
                 "session_id": "1",
-                "message": "There you go.",
+                "message": "Don't fill in Jozef Mrkvicka, fill my actual name instead",
             }
             response = requests.post("http://localhost:8000/structure", data=data, files=files)
             print(response.text)
