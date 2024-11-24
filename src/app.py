@@ -75,7 +75,6 @@ async def structure(
         message_history.append({"role": "user", "content": structure_message})
 
         structure = chatbot.get_structured_output(message_history)
-        message_history.append({"role": "assistant", "content": structure})
 
         return {"structure": structure}
     except Exception as e:
