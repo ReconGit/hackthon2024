@@ -11,6 +11,9 @@ if "session_id" not in st.session_state:
 if "results" not in st.session_state:
     st.session_state.results = None
 
+if "chat_hisotry" not in st.session_state:
+    st.session_state.chat_history = {}
+
 if "doc" not in st.session_state:
     st.session_state.doc = None
 
@@ -82,6 +85,22 @@ def highlight_defects():
         stpdf.pdf_viewer("tmp.pdf")
 
 
+def display_chat(prompt_, message_):
+    session_id_ = st.session_state.session_id
+    chat_history = st.session_state.chat_history
+    if not session_id_ in chat_history:
+        chat_history[session_id_] = [(prompt_, message_)]
+    else:
+        chat_history[session_id_].append((prompt_, message_))
+    st.session_state.chat_history = chat_history
+
+    for exchange in chat_history[session_id_]:
+        with st.chat_message("human"):
+            st.write(exchange[0])
+        with st.chat_message("assistant"):
+            st.write(exchange[1])
+
+
 left_col, _, right_col = st.columns([0.35, 0.05, 0.6])
 
 with left_col:
@@ -98,7 +117,7 @@ with left_col:
                 ("files", (file.name, file.getvalue(), file.type)) for file in [document, template]
             ]
 
-            session_id = st.session_state.session_id
+            session_id_ = st.session_state.session_id
             st.session_state.session_id += 1
 
             st.session_state.results = [
@@ -106,7 +125,7 @@ with left_col:
                 {"level": "warning", "message": '(hereinafter referred to as the "Competition")'},
             ]
             data = {
-                "session_id": session_id,
+                "session_id": session_id_,
                 "message": "Hello, I need help with this document",
             }
             r = requests.post("http://localhost:8000/improvements", data=data, files=files)
@@ -130,10 +149,9 @@ with right_col:
     with chat_tab:
         prompt = st.chat_input("Ask something about document")
         if prompt:
-            session_id = st.session_state.session_id
-            data = {"session_id": session_id, "message": prompt}
+            session_id_ = st.session_state.session_id
+            data = {"session_id": session_id_, "message": prompt}
             r = requests.post("http://localhost:8000/chat", data=data)
             if r.ok:
                 message = r.json()["completion"]
-                with st.chat_message("assistant"):
-                    st.write(message)
+                display_chat(str(prompt), message)
