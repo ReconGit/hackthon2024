@@ -1,10 +1,10 @@
+from enum import Enum
 from textwrap import dedent
+from typing import Optional
 
 import openai
 from dotenv import load_dotenv
 from pydantic import BaseModel
-from typing import Optional
-from enum import Enum
 
 
 class FormStructure(BaseModel):
@@ -15,10 +15,12 @@ class FormStructure(BaseModel):
     current_date: str
     # TODO: Add more fields
 
+
 class ImprovementType(str, Enum):
     improvable = "improvable"
     missing = "missing"
     incorrect = "incorrect"
+
 
 class Improvement(BaseModel):
     type: ImprovementType
@@ -28,7 +30,8 @@ class Improvement(BaseModel):
 
 
 class Analysis(BaseModel):
-    issue: list[Improvement]
+    issues: list[Improvement]
+
 
 class Chatbot:
     def __init__(self):
