@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from io import BytesIO
 
 import pymupdf
@@ -60,7 +61,7 @@ def hightlight_color(defect):
 
 
 def highlight_defect(pdf, defect):
-    if defect["type"] == "missing" or not defect["occurence"]:
+    if defect["type"] == "missing" or "occurence" not in defect:
         return
 
     for i in range(0, pdf.page_count):
@@ -108,19 +109,25 @@ def display_chat(prompt_, message_):
 
 
 def show_summary():
+    doc = st.session_state.doc
+    if not doc:
+        return
+
     pdf = pymupdf.open(stream=doc.getvalue(), filetype="pdf")
     author = pdf.metadata["title"]
-    pages = pdf.page_count()
+    pages = pdf.page_count
     author = pdf.metadata["author"]
     creation_date = pdf.metadata["creationDate"]
-    creator = pdf.metadata["creator"]
+    creation_date = (
+        datetime.strptime(creation_date[2:16], "%Y%m%d%H%M%S")
+        - timedelta(hours=int(creation_date[16:19]), minutes=int(creation_date[20:22]))
+    ).strftime("%d.%m.%Y %H:%M:%S")
     pdf.close()
     for entry in [
         ("Author", author),
         ("Pages", pages),
         ("Author", author),
         ("Creation date", creation_date),
-        ("Creator", creator),
     ]:
         with st.container(border=True):
             col1, col2 = st.columns(2)
@@ -168,10 +175,10 @@ with right_col:
             defects_tab.write("Nothing to see...")
     with summary_tab:
         show_summary()
-        session_id_ = st.session_state.session_id
-        data = {"session_id": session_id_, "message": "hello"}
-        r = requests.post("http://localhost:8000/summary", data=data)
-        print(r.text)
+        # session_id_ = st.session_state.session_id
+        # data = {"session_id": session_id_, "message": "hello"}
+        # r = requests.post("http://localhost:8000/summary", data=data)
+        # print(r.text)
     with preview_tab:
         highlight_defects()
     with chat_tab:
