@@ -58,10 +58,10 @@ with left_col:
                 {"level": "warning", "message": "Better wording. Try ...."},
             ]
             data = {
-                "session_id": 1,
-                "message": "Hello, I need help with this document",
+                "session_id": "1",
+                "message": "Can you tell me what's my name again?",
             }
-            response = requests.post("http://localhost:8000/structure", data=data, files=files)
+            response = requests.post("http://localhost:8000/chat", data=data, files=files)
             print(response.text)
 
 with right_col:

@@ -36,19 +36,18 @@ class Chatbot:
         )
         return completion.choices[0].message.content
 
-    def get_structured_output(self, message):
+    def get_structured_output(self, message_history):
         system_prompt = dedent(
             """
             Extract the structure from the given text.
             If some information is missing or is ambiguous, please provide an empty placeholder (null).
             """
         ).strip()
+        messages = [{"role": "system", "content": system_prompt}]
+        messages.extend(message_history)
 
         structure = self.openai_client.beta.chat.completions.parse(
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": message},
-            ],
+            messages=messages,  # type: ignore
             model="gpt-4o-mini",
             temperature=0.0,
             response_format=FormStructure,

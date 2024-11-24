@@ -5,13 +5,6 @@ import pymupdf as fitz
 import uvicorn
 from chatbot import Chatbot
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
-from pydantic import BaseModel
-
-
-class Message(BaseModel):
-    session_id: str
-    message: str
-
 
 chatbot = Chatbot()
 session_history = {}
@@ -76,11 +69,12 @@ async def structure(
                 print(f"Extracted text from {extracted_text}")
 
             structure_message = message + "\nUploaded documents:\n".join(file_contents)
+            print(f"Structure message: {structure_message}")
         else:
             structure_message = message
         message_history.append({"role": "user", "content": structure_message})
 
-        structure = chatbot.get_structured_output(structure_message)
+        structure = chatbot.get_structured_output(message_history)
         message_history.append({"role": "assistant", "content": structure})
 
         return {"structure": structure}
