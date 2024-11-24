@@ -107,6 +107,29 @@ def display_chat(prompt_, message_):
             st.write(exchange[1])
 
 
+def show_summary():
+    pdf = pymupdf.open(stream=doc.getvalue(), filetype="pdf")
+    author = pdf.metadata["title"]
+    pages = pdf.page_count()
+    author = pdf.metadata["author"]
+    creation_date = pdf.metadata["creationDate"]
+    creator = pdf.metadata["creator"]
+    pdf.close()
+    for entry in [
+        ("Author", author),
+        ("Pages", pages),
+        ("Author", author),
+        ("Creation date", creation_date),
+        ("Creator", creator),
+    ]:
+        with st.container(border=True):
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write(entry[0])
+            with col2:
+                st.write(entry[1])
+
+
 left_col, _, right_col = st.columns([0.35, 0.05, 0.6])
 
 with left_col:
@@ -144,6 +167,7 @@ with right_col:
         else:
             defects_tab.write("Nothing to see...")
     with summary_tab:
+        show_summary()
         session_id_ = st.session_state.session_id
         data = {"session_id": session_id_, "message": "hello"}
         r = requests.post("http://localhost:8000/summary", data=data)
