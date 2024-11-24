@@ -51,7 +51,7 @@ def display_result(con, result):
 
 
 def hightlight_color(defect):
-    if defect["type"] == "error":
+    if defect["type"] == "incorrect" or defect["type"] == "missing":
         return (1, 0, 0)
     return (1, 1, 0)
 
@@ -129,6 +129,7 @@ with left_col:
             }
             response = requests.post("http://localhost:8000/analysis", data=data, files=files)
             st.session_state.results = response.json()["analysis"]["issues"]
+            print(response.text)
 
 with right_col:
     st.header("Result")
