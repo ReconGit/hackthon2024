@@ -21,6 +21,9 @@ if "doc" not in st.session_state:
 if "tpl" not in st.session_state:
     st.session_state.tpl = None
 
+if "quality" not in st.session_state:
+    st.session_state.quality = None
+
 st.set_page_config(
     page_title="QuickForm",
     layout="wide",
@@ -41,6 +44,15 @@ def show_icon(level):
 
 
 def display_result(con, result):
+    if not st.session_state.quality:
+        return
+    with con.container(border=True):
+        col_a, colb_ = st.columns([0.9, 0.1], vertical_alignment="center")
+        with col_a:
+            st.write("Rating")
+        with colb_:
+            st.write(f"{str(st.session_state.quality)}%")
+
     for entry in result:
         c = con.container(border=True)
         icon_col, error_col = c.columns([0.05, 0.6], vertical_alignment="center")
@@ -61,7 +73,7 @@ def hightlight_color(defect):
 
 
 def highlight_defect(pdf, defect):
-    if defect["type"] == "missing" or "occurence" not in defect:
+    if defect["type"] == "missing":
         return
 
     for i in range(0, pdf.page_count):
@@ -114,7 +126,7 @@ def show_summary():
         return
 
     pdf = pymupdf.open(stream=doc.getvalue(), filetype="pdf")
-    author = pdf.metadata["title"]
+    title = pdf.metadata["title"]
     pages = pdf.page_count
     author = pdf.metadata["author"]
     creation_date = pdf.metadata["creationDate"]
@@ -124,6 +136,7 @@ def show_summary():
     ).strftime("%d.%m.%Y %H:%M:%S")
     pdf.close()
     for entry in [
+        ("Title", title),
         ("Author", author),
         ("Pages", pages),
         ("Author", author),
@@ -160,7 +173,9 @@ with left_col:
                 "message": "Hello, I need help with this document",
             }
             response = requests.post("http://localhost:8000/analysis", data=data, files=files)
+            print(response.text)
             st.session_state.results = response.json()["analysis"]["issues"]
+            st.session_state.quality = response.json()["analysis"]["rating"]
 
 with right_col:
     st.header("Result")
