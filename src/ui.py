@@ -128,8 +128,8 @@ with left_col:
                 "session_id": session_id_,
                 "message": "Hello, I need help with this document",
             }
-            r = requests.post("http://localhost:8000/improvements", data=data, files=files)
-            print(r.json())
+            response = requests.post("http://localhost:8000/analysis", data=data, files=files)
+            print(response.text)
 
 with right_col:
     st.header("Result")
