@@ -76,7 +76,7 @@ class Chatbot:
     def get_analysis(self, message_history):
         system_prompt = dedent(
             """
-            Based on the instructions that were provided in TEMPLATE_FILE evaluate my request in DOCUMENT_FILE. Make sure to structure your evaluation in a way that conforms to this JSON design:
+            Based on the instructions that were provided in template file evaluate my request in filled document. Make sure to structure your evaluation in a way that conforms to this JSON design:
             
             {
                 {
@@ -95,12 +95,12 @@ class Chatbot:
                 - suggestion: ""
             "incorrect" - things that should not be present, or are written incorrectly but cannot be repaired using available context (like incorrect formatting of the phone number, email address...)
                 - message: what is incorrect and the reason why it is incorrect (should be at most 80 characters long)
-                - occurrence: the exact occurrence in text
+                - occurrence: the exact citation of the occurrence in text
                 - suggestion: ""
             "improvable" - things that could be improved, worded differently, adjusted to fit the standard etc.
                 - message: what is improvable and the reason why it is improvable (should be at most 80 characters long)
-                - occurrence: the exact occurrence in text
-                - suggestion: an example/suggestion with what the improved version of this should look like
+                - occurrence: the exact citation of the occurrence in text
+                - suggestion: an example/suggestion with what the instance could be replaced with
             """
         ).strip()
         messages = [{"role": "system", "content": system_prompt}]
@@ -111,6 +111,23 @@ class Chatbot:
             model="gpt-4o-mini",
             temperature=0.0,
             response_format=Analysis,
+        )
+        return structure.choices[0].message.parsed
+
+    def get_summary(self, message_history):
+        system_prompt = dedent(
+            """
+            Summarize what this filled document is about in no more than 300 characters (around 3 sentences) 
+            as if it was a description of the file in a document viewing application
+            """
+        ).strip()
+        messages = [{"role": "system", "content": system_prompt}]
+        messages.extend(message_history)
+
+        structure = self.openai_client.beta.chat.completions.parse(
+            messages=messages,  # type: ignore
+            model="gpt-4o-mini",
+            temperature=0.0,
         )
         return structure.choices[0].message.parsed
 
