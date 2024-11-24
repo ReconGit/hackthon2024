@@ -61,7 +61,7 @@ with left_col:
                 "session_id": "1",
                 "message": "Don't fill in Jozef Mrkvicka, fill my actual name instead",
             }
-            response = requests.post("http://localhost:8000/structure", data=data, files=files)
+            response = requests.post("http://localhost:8000/analysis", data=data, files=files)
             print(response.text)
 
 with right_col:
