@@ -1,16 +1,17 @@
 from contextlib import asynccontextmanager
-from typing import List
+from typing import Optional
 
-import fitz
+import pymupdf as fitz
 import uvicorn
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
 
 from chatbot import Chatbot
 
 
 class Message(BaseModel):
-    session_id: int
+    session_id: str
+    message: str
 
 
 chatbot = Chatbot()
@@ -33,11 +34,20 @@ async def root():
 
 
 @app.post("/chat")
-async def chat(message: Message, files: List[UploadFile] = File(...)):
+async def chat(
+    session_id: str = Form(...),
+    message: str = Form(...),
+    files: Optional[list[UploadFile]] = None,
+):
+    print(f"Received message: {message}")
+    print(f"Received files: {files}")
     try:
-        if message.session_id not in session_history:
-            session_history[message.session_id] = []
-        message_history: list[dict] = session_history[message.session_id]
+        if not message and not files:
+            raise HTTPException(status_code=400, detail="No message or files provided")
+
+        if session_id not in session_history:
+            session_history[session_id] = []
+        message_history: list[dict] = session_history[session_id]
 
         if files:
             file_contents = []
@@ -48,11 +58,12 @@ async def chat(message: Message, files: List[UploadFile] = File(...)):
                 for page in pdf_document:
                     extracted_text += page.get_text()
                 file_contents.append(extracted_text)
+                print(f"Extracted text from {extracted_text}")
 
-            files_message = message.message + "\nUploaded documents:\n".join(file_contents)
+            files_message = message + "\nUploaded documents:\n".join(file_contents)
             message_history.append({"role": "user", "content": files_message})
         else:
-            message_history.append({"role": "user", "content": message.message})
+            message_history.append({"role": "user", "content": message})
 
         completion = chatbot.get_chat_completion(message_history)
         message_history.append({"role": "assistant", "content": completion})
@@ -72,15 +83,18 @@ async def structure(message: Message):
 
 
 @app.post("/upload-pdf")  # DEPRECATED
-async def upload_pdf(file: UploadFile = File(...)):
+async def upload_pdf(files: list[UploadFile]):
     try:
-        content = await file.read()
-        pdf_document = fitz.open(stream=content, filetype="pdf")
-        extracted_text = ""
-        for page in pdf_document:
-            extracted_text += page.get_text()
+        file_contents = []
+        for file in files:
+            content = await file.read()
+            pdf_document = fitz.open(stream=content, filetype="pdf")
+            extracted_text = ""
+            for page in pdf_document:
+                extracted_text += page.get_text()
+            file_contents.append(extracted_text)
 
-        return {"text": extracted_text}
+        return {"text": file_contents}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {e}")
 

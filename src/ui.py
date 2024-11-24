@@ -13,22 +13,27 @@ st.set_page_config(
 st.title("QuickForm")
 
 
+def show_icon(level):
+    match level:
+        case "error":
+            st.image("resources/error.png")
+        case "warning":
+            st.image("resources/warning.png")
+
+
 def display_result(con, result):
     i = 0
     for entry in result:
         c = con.container(border=True)
-        icon_col, error_col, goto_col = c.columns([0.05, 0.6, 0.1], vertical_alignment="center")
+        # icon_col, error_col, goto_col = c.columns([0.05, 0.6, 0.1], vertical_alignment="center")
+        icon_col, error_col = c.columns([0.05, 0.6], vertical_alignment="center")
         with icon_col:
-            match entry["level"]:
-                case "error":
-                    st.image("resources/error.png")
-                case "warning":
-                    st.image("resources/warning.png")
-
+            show_icon(entry["level"])
         with error_col:
-            st.write(entry["message"])
-        with goto_col:
-            st.button("Goto", key=f"goto_{i}")
+            with st.expander(entry["message"]):
+                st.write("Bdaksljflkajds;f")
+        # with goto_col:
+        #     st.button("Goto", key=f"goto_{i}")
         i += 1
 
 
@@ -45,15 +50,29 @@ with left_col:
 
     data = {"session_id": 1, "message": "hello"}
 
-    if document is not None:
-        file_type = document.type
-        if file_type == "application/pdf":
-            data["document"] = base64.encodebytes(document.getvalue())
+    # if document is not None:
+    #     file_type = document.type
+    #     if file_type == "application/pdf":
+    #         data["document"] = str(base64.b64encode(document.getvalue()))
 
-    if template is not None:
-        file_type = template.type
-        if file_type == "application/pdf":
-            data["template"] = base64.encodebytes(template.getvalue())
+    # if template is not None:
+    #     file_type = template.type
+    #     if file_type == "application/pdf":
+    #         data["template"] = str(base64.b64encode(template.getvalue()))
+
+    # if st.button("Submit"):
+    #     if document and template:
+    #         st.session_state.results = [
+    #             {"level": "error", "message": "Incorrect phone number"},
+    #             {"level": "warning", "message": "Better wording. Try ...."},
+    #         ]
+    #         response = requests.post("http://localhost:8000/chat", json=data)
+    #         print(response.text)
+
+    if document and template:
+        files = [
+            ("files", (file.name, file.getvalue(), file.type)) for file in [document, template]
+        ]
 
     if st.button("Submit"):
         if document and template:
@@ -61,18 +80,26 @@ with left_col:
                 {"level": "error", "message": "Incorrect phone number"},
                 {"level": "warning", "message": "Better wording. Try ...."},
             ]
-            response = requests.post("http://localhost:8000/chat", data=data)
+            data = {
+                "session_id": 1,
+                "message": "Hello, I need help with this document",
+            }
+            response = requests.post("http://localhost:8000/chat", data=data, files=files)
             print(response.text)
 
 with right_col:
     st.header("Result")
-    defects_tab, preview_tab, chat_tab = st.tabs(["Defects", "Preview", "Chat"])
+    defects_tab, overview_tab, preview_tab, chat_tab = st.tabs(
+        ["Defects", "Overview", "Preview", "Chat"]
+    )
     with defects_tab:
         results = st.session_state.results
         if results:
             display_result(defects_tab, results)
         else:
             right_col.write("Nothing to see...")
+    with overview_tab:
+        st.write("")
     with preview_tab:
         stpdf.pdf_viewer("resources/test_pdf.pdf", width=500)
     with chat_tab:
