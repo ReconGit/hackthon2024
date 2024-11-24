@@ -73,8 +73,31 @@ class Chatbot:
     def get_analysis(self, message_history):
         system_prompt = dedent(
             """
-            Extract the structure from the given text.
-            If some information is missing or is ambiguous, please provide an empty placeholder (null).
+            Based on the instructions that were provided in TEMPLATE_FILE evaluate my request in DOCUMENT_FILE. Make sure to structure your evaluation in a way that conforms to this JSON design:
+            
+            {
+                {
+                    "type": level,
+                    "message": message,
+                    "occurrence": occurrence,
+                    "suggestion": suggestion,
+                }
+            }
+            
+            
+            Types can fall under these categories (each determining what the message, occurrence and suggestion will contain):
+            "missing" - things that are expected to be included but were not found in the document
+                - message: items that are missing (should be at most 80 characters long)
+                - occurrence: ""
+                - suggestion: ""
+            "incorrect" - things that should not be present, or are written incorrectly but cannot be repaired using available context (like incorrect formatting of the phone number, email address...)
+                - message: what is incorrect and the reason why it is incorrect (should be at most 80 characters long)
+                - occurrence: the exact occurrence in text
+                - suggestion: ""
+            "improvable" - things that could be improved, worded differently, adjusted to fit the standard etc.
+                - message: what is improvable and the reason why it is improvable (should be at most 80 characters long)
+                - occurrence: the exact occurrence in text
+                - suggestion: an example/suggestion with what the improved version of this should look like
             """
         ).strip()
         messages = [{"role": "system", "content": system_prompt}]
