@@ -4,8 +4,9 @@ from typing import Optional
 
 import pymupdf as fitz
 import uvicorn
-from chatbot import Chatbot
 from fastapi import FastAPI, Form, HTTPException, UploadFile
+
+from chatbot import Chatbot
 
 chatbot = Chatbot()
 session_history = {}

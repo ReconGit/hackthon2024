@@ -77,7 +77,9 @@ def highlight_defects():
     pdf.close()
     with open("tmp.pdf", mode="wb") as f:
         f.write(buffer.getbuffer())
-    stpdf.pdf_viewer("tmp.pdf", width=700)
+    c = st.container(border=True)
+    with c:
+        stpdf.pdf_viewer("tmp.pdf")
 
 
 left_col, _, right_col = st.columns([0.35, 0.05, 0.6])
@@ -90,13 +92,12 @@ with left_col:
     st.session_state.doc = document
     st.session_state.tpl = template
 
-    if document and template:
-        files = [
-            ("files", (file.name, file.getvalue(), file.type)) for file in [document, template]
-        ]
-
     if st.button("Submit"):
         if document and template:
+            files = [
+                ("files", (file.name, file.getvalue(), file.type)) for file in [document, template]
+            ]
+
             session_id = st.session_state.session_id
             st.session_state.session_id += 1
 
@@ -129,8 +130,9 @@ with right_col:
         prompt = st.chat_input("Ask something about document")
         if prompt:
             session_id = st.session_state.session_id
-            data = {"session_id": session_id, "prompt": prompt}
-            r = requests.post("http://localhost:8000/chat", json=data)
-            print(r)
+            data = {"session_id": session_id, "message": prompt}
+            r = requests.post("http://localhost:8000/chat", data=data)
             if r.ok:
-                st.write(r.text)
+                message = r.json()["completion"]
+                with st.chat_message("assistant"):
+                    st.write(message)
