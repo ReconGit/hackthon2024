@@ -190,9 +190,9 @@ with right_col:
     with summary_tab:
         if st.session_state.doc:
             show_summary()
-            data = {"session_id": st.session_state.session_id, "message": "hello"}
-            r = requests.post("http://localhost:8000/summary", data=data)
-            print(r.text)
+            # data = {"session_id": st.session_state.session_id, "message": "hello"}
+            # r = requests.post("http://localhost:8000/summary", data=data)
+            # print(r.text)
     with preview_tab:
         highlight_defects()
     with chat_tab:

@@ -113,19 +113,15 @@ async def analysis(
             if len(files) == 3:
                 # save the historic data to a folder and unzip it
                 save_path = Path("historic")
-                print(save_path)
                 save_path.mkdir(parents=True, exist_ok=True)
                 # save the file
-                print("file created")
                 # save the file with privelaged permissions
                 zip_file_path = save_path / "data.zip"  # Create a full path with filename
                 with open(zip_file_path, "wb") as f:
                     f.write(zipper)
-                print("file saved")
                 # unzip the file
                 with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
                     zip_ref.extractall(save_path)
-                print("file unzipped")
 
             prompt_message = dedent(
                 f"""
