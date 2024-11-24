@@ -1,14 +1,26 @@
+import zipfile
 from contextlib import asynccontextmanager
+from pathlib import Path
 from textwrap import dedent
 from typing import Optional
 
 import pymupdf as fitz
 import uvicorn
-from fastapi import FastAPI, Form, HTTPException, UploadFile
-
 from chatbot import Chatbot
+from dotenv import load_dotenv
+from fastapi import FastAPI, Form, HTTPException, UploadFile
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
+from llama_parse import LlamaParse
+
+load_dotenv()
+
 
 chatbot = Chatbot()
+parser = LlamaParse(
+    result_type="text",  # type: ignore
+)  # "markdown" and "text" are available
+file_extractor = {".pdf": parser}
+
 session_history = {}
 
 
@@ -17,6 +29,7 @@ async def lifespan(app: FastAPI):
     print("Initializing app...")
     yield  # app is running asynchronously here
     print("Shutting down app...")
+    # remove cache folder
 
 
 app = FastAPI(lifespan=lifespan)
@@ -81,17 +94,38 @@ async def analysis(
         if files:
             file_contents = []
             file_names = []
+            idx = 0
+            zipper = None
             for file in files:
                 file_name = file.filename
                 file_names.append(file_name)
                 content = await file.read()
+                idx += 1
+                if idx > 2:
+                    zipper = content
+                    break
                 pdf_document = fitz.open(stream=content, filetype="pdf")
                 extracted_text = ""
                 for page in pdf_document:
                     extracted_text += page.get_text()
-                file_contents.append(
-                    f'Extracted text from file "{file_name}":\n{extracted_text}\n\n'
-                )
+                file_contents.append(f'Extracted text from file "{file_name}":\n{extracted_text}\n\n')
+
+            if len(files) == 3:
+                # save the historic data to a folder and unzip it
+                save_path = Path("historic")
+                print(save_path)
+                save_path.mkdir(parents=True, exist_ok=True)
+                # save the file
+                print("file created")
+                # save the file with privelaged permissions
+                zip_file_path = save_path / "data.zip"  # Create a full path with filename
+                with open(zip_file_path, "wb") as f:
+                    f.write(zipper)
+                print("file saved")
+                # unzip the file
+                with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
+                    zip_ref.extractall(save_path)
+                print("file unzipped")
 
             prompt_message = dedent(
                 f"""
@@ -116,6 +150,7 @@ async def analysis(
 
         return {"analysis": analysis}
     except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=f"Error: {e}")
 
 
