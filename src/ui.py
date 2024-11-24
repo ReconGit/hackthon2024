@@ -131,14 +131,14 @@ def show_summary():
     author = pdf.metadata["author"]
     creation_date = pdf.metadata["creationDate"]
     creation_date = (
-        datetime.strptime(creation_date[2:16], "%Y%m%d%H%M%S") - timedelta(hours=int(creation_date[16:19]), minutes=int(creation_date[20:22]))
+        datetime.strptime(creation_date[2:16], "%Y%m%d%H%M%S")
+        - timedelta(hours=int(creation_date[16:19]), minutes=int(creation_date[20:22]))
     ).strftime("%d.%m.%Y %H:%M:%S")
     pdf.close()
     for entry in [
         ("Title", title),
         ("Author", author),
         ("Pages", pages),
-        ("Author", author),
         ("Creation date", creation_date),
     ]:
         with st.container(border=True):
