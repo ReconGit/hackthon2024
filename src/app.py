@@ -1,10 +1,11 @@
 from contextlib import asynccontextmanager
+from textwrap import dedent
 from typing import Optional
 
 import pymupdf as fitz
 import uvicorn
 from chatbot import Chatbot
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, Form, HTTPException, UploadFile
 
 chatbot = Chatbot()
 session_history = {}
@@ -34,7 +35,6 @@ async def chat(
     try:
         if session_id not in session_history:
             session_history[session_id] = []
-
         message_history: list[dict] = session_history[session_id]
         message_history.append({"role": "user", "content": message})
 
@@ -76,6 +76,59 @@ async def structure(
         structure = chatbot.get_structured_output(message_history)
 
         return {"structure": structure}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error: {e}")
+
+
+@app.post("/improvements")
+async def structure(
+    session_id: str = Form(...),
+    message: str = Form(...),
+    files: Optional[list[UploadFile]] = None,
+):
+    try:
+        if session_id not in session_history:
+            session_history[session_id] = []
+        message_history: list[dict] = session_history[session_id]
+
+        if files:
+            file_content1 = []
+            file1 = files[0]
+            content = await file1.read()
+            pdf_document = fitz.open(stream=content, filetype="pdf")
+            extracted_text = ""
+            for page in pdf_document:
+                extracted_text += page.get_text()
+            file_content1.append(extracted_text)
+
+            file_content2 = []
+            file2 = files[1]
+            content = await file2.read()
+            pdf_document = fitz.open(stream=content, filetype="pdf")
+            extracted_text = ""
+            for page in pdf_document:
+                extracted_text += page.get_text()
+            file_content2.append(extracted_text)
+
+            prompt = dedent(
+                f"""
+                This is my filled form: 
+                {file_content1}
+
+                This is the template form:
+                {file_content2}
+
+                Please suggest improvements to my filled form.
+                """
+            ).strip()
+            improvement_message = message + prompt
+        else:
+            improvement_message = message
+        message_history.append({"role": "user", "content": improvement_message})
+
+        structure = chatbot.get_structured_output(message_history)
+
+        return {"improvements": structure}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {e}")
 
