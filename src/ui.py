@@ -141,7 +141,7 @@ with right_col:
         if results:
             display_result(defects_tab, results)
         else:
-            right_col.write("Nothing to see...")
+            defects_tab.write("Nothing to see...")
     with overview_tab:
         st.write("")
     with preview_tab:
