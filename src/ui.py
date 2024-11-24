@@ -7,7 +7,7 @@ import streamlit as st
 import streamlit_pdf_viewer as stpdf
 
 if "session_id" not in st.session_state:
-    st.session_state.session_id = 0
+    st.session_state.session_id = 1
 
 if "results" not in st.session_state:
     st.session_state.results = None
@@ -131,8 +131,7 @@ def show_summary():
     author = pdf.metadata["author"]
     creation_date = pdf.metadata["creationDate"]
     creation_date = (
-        datetime.strptime(creation_date[2:16], "%Y%m%d%H%M%S")
-        - timedelta(hours=int(creation_date[16:19]), minutes=int(creation_date[20:22]))
+        datetime.strptime(creation_date[2:16], "%Y%m%d%H%M%S") - timedelta(hours=int(creation_date[16:19]), minutes=int(creation_date[20:22]))
     ).strftime("%d.%m.%Y %H:%M:%S")
     pdf.close()
     for entry in [
@@ -155,21 +154,21 @@ left_col, _, right_col = st.columns([0.35, 0.05, 0.6])
 with left_col:
     st.header("Upload your documents here")
     template = st.file_uploader("Template", key="template", type=["pdf"])
-    document = st.file_uploader("Document", key="document", type=["pdf"])
+    document = st.file_uploader("Filled Document", key="document", type=["pdf"])
+    historic_data = st.file_uploader("Historic Data (Optional)", key="historic_data", type=["zip"])
 
     if st.button("Submit"):
         if document and template:
             st.session_state.doc = document
             st.session_state.tpl = template
+            uploaded_files = [template, document]
+            if historic_data:
+                st.session_state.hd = historic_data
+                uploaded_files.append(historic_data)
 
-            files = [
-                ("files", (file.name, file.getvalue(), file.type)) for file in [template, document]
-            ]
-
-            st.session_state.session_id += 1
-            session_id_ = st.session_state.session_id
+            files = [("files", (file.name, file.getvalue(), file.type)) for file in uploaded_files]
             data = {
-                "session_id": session_id_,
+                "session_id": st.session_state.session_id,
                 "message": "Hello, I need help with this document",
             }
             response = requests.post("http://localhost:8000/analysis", data=data, files=files)
@@ -180,27 +179,26 @@ with left_col:
 with right_col:
     st.header("Result")
     defects_tab, summary_tab, preview_tab, chat_tab = st.tabs(
-        ["Defects", "Summary", "Preview", "Chat"]
+        ["Analysis", "Summary", "Preview", "Chat"],
     )
     with defects_tab:
         results = st.session_state.results
         if results:
             display_result(defects_tab, results)
         else:
-            defects_tab.write("Nothing to see...")
+            defects_tab.write("Please upload your documents...")
     with summary_tab:
-        show_summary()
-        session_id_ = st.session_state.session_id
-        data = {"session_id": session_id_, "message": "hello"}
-        r = requests.post("http://localhost:8000/summary", data=data)
-        print(r.text)
+        if st.session_state.doc:
+            show_summary()
+            data = {"session_id": st.session_state.session_id, "message": "hello"}
+            r = requests.post("http://localhost:8000/summary", data=data)
+            print(r.text)
     with preview_tab:
         highlight_defects()
     with chat_tab:
-        prompt = st.chat_input("Ask something about document")
+        prompt = st.chat_input("Ask questions about the document..")
         if prompt:
-            session_id_ = st.session_state.session_id
-            data = {"session_id": session_id_, "message": prompt}
+            data = {"session_id": st.session_state.session_id, "message": prompt}
             r = requests.post("http://localhost:8000/chat", data=data)
             if r.ok:
                 message = r.json()["completion"]
