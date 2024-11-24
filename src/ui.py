@@ -109,7 +109,6 @@ with left_col:
                 "message": "Hello, I need help with this document",
             }
             r = requests.post("http://localhost:8000/structure", data=data, files=files)
-            print(r.text)
 
 with right_col:
     st.header("Result")
@@ -132,3 +131,6 @@ with right_col:
             session_id = st.session_state.session_id
             data = {"session_id": session_id, "prompt": prompt}
             r = requests.post("http://localhost:8000/chat", json=data)
+            print(r)
+            if r.ok:
+                st.write(r.text)
