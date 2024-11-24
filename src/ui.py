@@ -29,19 +29,13 @@ left_col, _, right_col = st.columns([0.35, 0.05, 0.6])
 with left_col:
     results = st.session_state.results
     st.header("Upload your documents here")
-    document = st.file_uploader("Document", key="document", type=["pdf"])
-    template = st.file_uploader("Template", key="template", type=["pdf"])
+    document = st.file_uploader("Document", type="pdf")
+    template = st.file_uploader("Template", type="pdf")
 
-    files = []
-    if document is not None:
-        file_type = document.type
-        if file_type == "application/pdf":
-            files.append(("files", (document.name, document.getvalue(), document.type)))
-
-    if template is not None:
-        file_type = template.type
-        if file_type == "application/pdf":
-            files.append(("files", (template.name, template.getvalue(), template.type)))
+    if document and template:
+        print("Both files uploaded")
+        uploaded_files = [document, template]
+        files = [("files", (file.name, file.getvalue(), file.type)) for file in uploaded_files]
 
     if st.button("Submit"):
         if document and template:
@@ -49,7 +43,11 @@ with left_col:
                 {"level": "error", "message": "Incorrect phone number"},
                 {"level": "warning", "message": "Better wording. Try ...."},
             ]
-            data = {"session_id": 1}
+            data = {
+                "session_id": 1,
+                "message": "Hello, I need help with this document",
+            }
+            print(f"Sending message: {data}")
             response = requests.post("http://localhost:8000/chat", data=data, files=files)
             print(response.text)
 
