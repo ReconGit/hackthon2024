@@ -121,7 +121,7 @@ with left_col:
             st.session_state.tpl = template
 
             files = [
-                ("files", (file.name, file.getvalue(), file.type)) for file in [document, template]
+                ("files", (file.name, file.getvalue(), file.type)) for file in [template, document]
             ]
 
             st.session_state.session_id += 1
