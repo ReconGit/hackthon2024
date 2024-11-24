@@ -105,7 +105,8 @@ class Chatbot:
             
             rating: percentual rating of the quality of the data provided by user in the filled document 
             in respect to the template document
-            Notice important information such as timetables, names, dates, goals, finances. 
+            Notice important information such as timetables, names, dates, goals, finances. Especially inconsistencies
+            between sequences of dates, total finances...
             """
         ).strip()
         messages = [{"role": "system", "content": system_prompt}]

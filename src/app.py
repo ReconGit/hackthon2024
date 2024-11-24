@@ -4,9 +4,8 @@ from typing import Optional
 
 import pymupdf as fitz
 import uvicorn
-from fastapi import FastAPI, Form, HTTPException, UploadFile
-
 from chatbot import Chatbot
+from fastapi import FastAPI, Form, HTTPException, UploadFile
 
 chatbot = Chatbot()
 session_history = {}
@@ -59,38 +58,10 @@ async def summary(
         message_history: list[dict] = session_history[session_id]
         message_history.append({"role": "user", "content": message})
 
-        if files:
-            file_contents = []
-            file_names = []
-            for file in files:
-                file_name = file.filename
-                file_names.append(file_name)
-                content = await file.read()
-                pdf_document = fitz.open(stream=content, filetype="pdf")
-                extracted_text = ""
-                for page in pdf_document:
-                    extracted_text += page.get_text()
-                file_contents.append(f'Extracted text from file "{file_name}":\n{extracted_text}\n\n')
+        summary = chatbot.get_summary(message_history)
+        message_history.append({"role": "assistant", "content": summary})
 
-            prompt_message = dedent(
-                f"""
-                The document I uploaded is called {file_names[0]}.
-                {file_names[0]} is the form filled by the user.
-
-                This is the extracted text from the filled document:
-                {file_contents[0]}
-                """
-            ).strip()
-
-            print(prompt_message)
-        else:
-            prompt_message = message
-        message_history.append({"role": "user", "content": prompt_message})
-
-        completion = chatbot.get_summary(message_history)
-        message_history.append({"role": "assistant", "content": completion})
-
-        return {"completion": completion}
+        return {"summary": summary}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {e}")
 
@@ -117,9 +88,7 @@ async def analysis(
                 extracted_text = ""
                 for page in pdf_document:
                     extracted_text += page.get_text()
-                file_contents.append(
-                    f'Extracted text from file "{file_name}":\n{extracted_text}\n\n'
-                )
+                file_contents.append(f'Extracted text from file "{file_name}":\n{extracted_text}\n\n')
 
             prompt_message = dedent(
                 f"""
@@ -139,8 +108,8 @@ async def analysis(
             print(prompt_message)
         else:
             prompt_message = message
-        message_history.append({"role": "user", "content": prompt_message})
 
+        message_history.append({"role": "user", "content": prompt_message})
         analysis = chatbot.get_analysis(message_history)
 
         return {"analysis": analysis}
