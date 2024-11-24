@@ -41,22 +41,9 @@ async def chat(
     try:
         if session_id not in session_history:
             session_history[session_id] = []
+
         message_history: list[dict] = session_history[session_id]
-
-        if files:
-            file_contents = []
-            for file in files:
-                content = await file.read()
-                pdf_document = fitz.open(stream=content, filetype="pdf")
-                extracted_text = ""
-                for page in pdf_document:
-                    extracted_text += page.get_text()
-                file_contents.append(extracted_text)
-
-            files_message = message + "\nUploaded documents:\n".join(file_contents)
-            message_history.append({"role": "user", "content": files_message})
-        else:
-            message_history.append({"role": "user", "content": message})
+        message_history.append({"role": "user", "content": message})
 
         completion = chatbot.get_chat_completion(message_history)
         message_history.append({"role": "assistant", "content": completion})
@@ -73,6 +60,10 @@ async def structure(
     files: Optional[list[UploadFile]] = None,
 ):
     try:
+        if session_id not in session_history:
+            session_history[session_id] = []
+        message_history: list[dict] = session_history[session_id]
+
         if files:
             file_contents = []
             for file in files:
@@ -87,8 +78,11 @@ async def structure(
             structure_message = message + "\nUploaded documents:\n".join(file_contents)
         else:
             structure_message = message
+        message_history.append({"role": "user", "content": structure_message})
 
         structure = chatbot.get_structured_output(structure_message)
+        message_history.append({"role": "assistant", "content": structure})
+
         return {"structure": structure}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {e}")
