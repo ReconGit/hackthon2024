@@ -25,12 +25,12 @@ if "quality" not in st.session_state:
     st.session_state.quality = None
 
 st.set_page_config(
-    page_title="QuickForm",
+    page_title="QuickValidate",
     layout="wide",
     page_icon="resources/icon.png",
     initial_sidebar_state="expanded",
 )
-st.title("QuickForm")
+st.title("QuickValidate")
 
 
 def show_icon(level):
