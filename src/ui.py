@@ -14,9 +14,10 @@ st.title("QuickForm")
 
 
 def display_result(con, result):
+    i = 0
     for entry in result:
         c = con.container(border=True)
-        icon_col, error_col = c.columns([0.05, 0.8], vertical_alignment="center")
+        icon_col, error_col, goto_col = c.columns([0.05, 0.6, 0.1], vertical_alignment="center")
         with icon_col:
             match entry["level"]:
                 case "error":
@@ -26,6 +27,9 @@ def display_result(con, result):
 
         with error_col:
             st.write(entry["message"])
+        with goto_col:
+            st.button("Goto", key=f"goto_{i}")
+        i += 1
 
 
 if "results" not in st.session_state:
@@ -61,19 +65,17 @@ with left_col:
             print(response.text)
 
 with right_col:
-    results_tab, preview_tab, chat_tab = st.tabs(["Results", "Preview", "Chat"])
-    with results_tab:
-        st.header("Results")
+    st.header("Result")
+    defects_tab, preview_tab, chat_tab = st.tabs(["Defects", "Preview", "Chat"])
+    with defects_tab:
         results = st.session_state.results
         if results:
-            display_result(results_tab, results)
+            display_result(defects_tab, results)
         else:
             right_col.write("Nothing to see...")
     with preview_tab:
-        st.header("Preview")
         stpdf.pdf_viewer("resources/test_pdf.pdf", width=500)
     with chat_tab:
-        st.header("Chat")
         prompt = st.chat_input("Ask something about document")
         if prompt:
             st.write(f"Prompt: {prompt}")
