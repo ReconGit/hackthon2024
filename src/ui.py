@@ -48,31 +48,8 @@ with left_col:
     document = st.file_uploader("Document", key="document", type=["pdf"])
     template = st.file_uploader("Template", key="template", type=["pdf"])
 
-    data = {"session_id": 1, "message": "hello"}
-
-    # if document is not None:
-    #     file_type = document.type
-    #     if file_type == "application/pdf":
-    #         data["document"] = str(base64.b64encode(document.getvalue()))
-
-    # if template is not None:
-    #     file_type = template.type
-    #     if file_type == "application/pdf":
-    #         data["template"] = str(base64.b64encode(template.getvalue()))
-
-    # if st.button("Submit"):
-    #     if document and template:
-    #         st.session_state.results = [
-    #             {"level": "error", "message": "Incorrect phone number"},
-    #             {"level": "warning", "message": "Better wording. Try ...."},
-    #         ]
-    #         response = requests.post("http://localhost:8000/chat", json=data)
-    #         print(response.text)
-
     if document and template:
-        files = [
-            ("files", (file.name, file.getvalue(), file.type)) for file in [document, template]
-        ]
+        files = [("files", (file.name, file.getvalue(), file.type)) for file in [document, template]]
 
     if st.button("Submit"):
         if document and template:
@@ -84,14 +61,12 @@ with left_col:
                 "session_id": 1,
                 "message": "Hello, I need help with this document",
             }
-            response = requests.post("http://localhost:8000/chat", data=data, files=files)
+            response = requests.post("http://localhost:8000/structure", data=data, files=files)
             print(response.text)
 
 with right_col:
     st.header("Result")
-    defects_tab, overview_tab, preview_tab, chat_tab = st.tabs(
-        ["Defects", "Overview", "Preview", "Chat"]
-    )
+    defects_tab, overview_tab, preview_tab, chat_tab = st.tabs(["Defects", "Overview", "Preview", "Chat"])
     with defects_tab:
         results = st.session_state.results
         if results:

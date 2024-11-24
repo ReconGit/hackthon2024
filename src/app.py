@@ -3,10 +3,9 @@ from typing import Optional
 
 import pymupdf as fitz
 import uvicorn
+from chatbot import Chatbot
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from pydantic import BaseModel
-
-from chatbot import Chatbot
 
 
 class Message(BaseModel):
