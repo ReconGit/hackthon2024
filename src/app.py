@@ -38,12 +38,7 @@ async def chat(
     message: str = Form(...),
     files: Optional[list[UploadFile]] = None,
 ):
-    print(f"Received message: {message}")
-    print(f"Received files: {files}")
     try:
-        if not message and not files:
-            raise HTTPException(status_code=400, detail="No message or files provided")
-
         if session_id not in session_history:
             session_history[session_id] = []
         message_history: list[dict] = session_history[session_id]
@@ -57,7 +52,6 @@ async def chat(
                 for page in pdf_document:
                     extracted_text += page.get_text()
                 file_contents.append(extracted_text)
-                print(f"Extracted text from {extracted_text}")
 
             files_message = message + "\nUploaded documents:\n".join(file_contents)
             message_history.append({"role": "user", "content": files_message})
@@ -73,27 +67,29 @@ async def chat(
 
 
 @app.post("/structure")
-async def structure(message: Message):
+async def structure(
+    session_id: str = Form(...),
+    message: str = Form(...),
+    files: Optional[list[UploadFile]] = None,
+):
     try:
-        structure = chatbot.get_structured_output(message.message)
+        if files:
+            file_contents = []
+            for file in files:
+                content = await file.read()
+                pdf_document = fitz.open(stream=content, filetype="pdf")
+                extracted_text = ""
+                for page in pdf_document:
+                    extracted_text += page.get_text()
+                file_contents.append(extracted_text)
+                print(f"Extracted text from {extracted_text}")
+
+            structure_message = message + "\nUploaded documents:\n".join(file_contents)
+        else:
+            structure_message = message
+
+        structure = chatbot.get_structured_output(structure_message)
         return {"structure": structure}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error: {e}")
-
-
-@app.post("/upload-pdf")  # DEPRECATED
-async def upload_pdf(files: list[UploadFile]):
-    try:
-        file_contents = []
-        for file in files:
-            content = await file.read()
-            pdf_document = fitz.open(stream=content, filetype="pdf")
-            extracted_text = ""
-            for page in pdf_document:
-                extracted_text += page.get_text()
-            file_contents.append(extracted_text)
-
-        return {"text": file_contents}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error: {e}")
 
