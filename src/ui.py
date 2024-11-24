@@ -79,7 +79,6 @@ def highlight_defects():
 
     pdf = pymupdf.open(stream=doc.getvalue(), filetype="pdf")
     for defect in st.session_state.results:
-        print(defect)
         highlight_defect(pdf, defect)
 
     buffer = BytesIO()
@@ -130,14 +129,13 @@ with left_col:
                 "session_id": session_id_,
                 "message": "Hello, I need help with this document",
             }
-            response = requests.post("http://localhost:8000/analysis", data=data, files=files)
+            response = requests.post("http://localhost:8000/analysis", data=data)
             st.session_state.results = response.json()["analysis"]["issues"]
-            print(response.text)
 
 with right_col:
     st.header("Result")
-    defects_tab, overview_tab, preview_tab, chat_tab = st.tabs(
-        ["Defects", "Overview", "Preview", "Chat"]
+    defects_tab, summary_tab, preview_tab, chat_tab = st.tabs(
+        ["Defects", "Summary", "Preview", "Chat"]
     )
     with defects_tab:
         results = st.session_state.results
@@ -145,8 +143,11 @@ with right_col:
             display_result(defects_tab, results)
         else:
             defects_tab.write("Nothing to see...")
-    with overview_tab:
-        st.write("")
+    with summary_tab:
+        session_id_ = st.session_state.session_id
+        data = {"session_id": session_id_, "message": "hello"}
+        r = requests.post("http://localhost:8000/summary", data=data)
+        print(r.text)
     with preview_tab:
         highlight_defects()
     with chat_tab:
