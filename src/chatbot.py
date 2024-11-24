@@ -88,7 +88,7 @@ class Chatbot:
                 }
             ]
             
-            
+            Instructions:
             Types can fall under these categories (each determining what the message, occurrence and suggestion will contain):
             "missing" - things that are expected to be included but were not found in the document
                 - message: items that are missing (should be at most 80 characters long)
@@ -105,6 +105,7 @@ class Chatbot:
             
             rating: percentual rating of the quality of the data provided by user in the filled document 
             in respect to the template document
+            Notice important information such as timetables, names, dates, goals, finances. 
             """
         ).strip()
         messages = [{"role": "system", "content": system_prompt}]
